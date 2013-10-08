@@ -141,7 +141,7 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 		isRosterSetup=false;
 	}
 	
-	protected void setUpRoster() {
+	protected synchronized void setUpRoster() {
 		//If we've already set the roster up, do nothing
 		if (isRosterSetup) {
 			if (_logger.isTraceEnabled()) {
