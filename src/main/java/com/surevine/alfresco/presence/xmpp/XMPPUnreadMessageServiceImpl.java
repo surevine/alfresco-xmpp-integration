@@ -55,26 +55,28 @@ public class XMPPUnreadMessageServiceImpl extends XMPPService implements XMPPUnr
 		
 		Connection connection = getConnection(user);
 		
-		OfflineMessageManager offlineMessages = getOfflineMessageManager(connection);
-		
-		if (_logger.isInfoEnabled()) {
-			_logger.info("Retrieving unread message count for "+user.getUsername());
+		synchronized(connection) {
+			OfflineMessageManager offlineMessages = getOfflineMessageManager(connection);
+			
+			if (_logger.isInfoEnabled()) {
+				_logger.info("Retrieving unread message count for "+user.getUsername());
+			}
+			
+			int messageCount = 0;
+			try {
+				messageCount = offlineMessages.getMessageCount();
+			} catch (XMPPException e) {
+				_logger.error("Error retrieving unread message count for "+user.getUsername());
+				resetConnection(user);
+				throw new XMPPExecutionException("Error retrieving unread message count for "+user.getUsername(), e);
+			}
+			
+			if (messageCount>0) {
+				resetConnection(user);
+			}
+			
+			return messageCount;
 		}
-		
-		int messageCount = 0;
-		try {
-			messageCount = offlineMessages.getMessageCount();
-		} catch (XMPPException e) {
-			_logger.error("Error retrieving unread message count for "+user.getUsername());
-			resetConnection(user);
-			throw new XMPPExecutionException("Error retrieving unread message count for "+user.getUsername(), e);
-		}
-		
-		if (messageCount>0) {
-			resetConnection(user);
-		}
-		
-		return messageCount;
 	}
 	
 	@Override
@@ -83,62 +85,65 @@ public class XMPPUnreadMessageServiceImpl extends XMPPService implements XMPPUnr
 		validateUser(user);
 		
 		Connection connection = getConnection(user);
-		OfflineMessageManager offlineMessages = getOfflineMessageManager(connection);
-		
-		if (_logger.isInfoEnabled()) {
-			_logger.info("Retrieving unread message headers for "+user.getUsername());
-		}
-		
-		Iterator<OfflineMessageHeader> headers = null; 
-		Collection<OfflineMessageHeader> filteredHeaders = new ArrayList<OfflineMessageHeader>();
-		try {
-			headers = offlineMessages.getHeaders();
-			if (_logger.isDebugEnabled()) {
-				_logger.debug("Found the following message headers:");
-			}
-			Iterator<OfflineMessageHeader> dbHeaders = offlineMessages.getHeaders();
-			//boolean traceAllMessages=false; //See below block
+		synchronized (connection) {
 			
-			while (dbHeaders.hasNext()) {
-				OfflineMessageHeader header = dbHeaders.next();
+			OfflineMessageManager offlineMessages = getOfflineMessageManager(connection);
+			
+			if (_logger.isInfoEnabled()) {
+				_logger.info("Retrieving unread message headers for "+user.getUsername());
+			}
+			
+			Iterator<OfflineMessageHeader> headers = null; 
+			Collection<OfflineMessageHeader> filteredHeaders = new ArrayList<OfflineMessageHeader>();
+			try {
+				headers = offlineMessages.getHeaders();
 				if (_logger.isDebugEnabled()) {
-					_logger.debug("    "+header.getJid()+"|"+header.getStamp()+"|"+header.getUser());
+					_logger.debug("Found the following message headers:");
 				}
+				Iterator<OfflineMessageHeader> dbHeaders = offlineMessages.getHeaders();
+				//boolean traceAllMessages=false; //See below block
 				
-				// filter out headers with invalid jid's
-				if(header.getJid().contains("@")) {
-					filteredHeaders.add(header);
-				}
-				else {
-					//traceAllMessages=true; //Again, see below block
+				while (dbHeaders.hasNext()) {
+					OfflineMessageHeader header = dbHeaders.next();
 					if (_logger.isDebugEnabled()) {
-						_logger.debug("Filtering out a message with JID: "+header.getJid()+" stamp "+header.getStamp()+" and user "+header.getUser());
+						_logger.debug("    "+header.getJid()+"|"+header.getStamp()+"|"+header.getUser());
+					}
+					
+					// filter out headers with invalid jid's
+					if(header.getJid().contains("@")) {
+						filteredHeaders.add(header);
+					}
+					else {
+						//traceAllMessages=true; //Again, see below block
+						if (_logger.isDebugEnabled()) {
+							_logger.debug("Filtering out a message with JID: "+header.getJid()+" stamp "+header.getStamp()+" and user "+header.getUser());
+						}
 					}
 				}
+				/*
+				 * For investigation only - do not leave in production code, even on TRACE, as it crashes the server a lot
+				 */
+				
+				/* if (_logger.isTraceEnabled() && traceAllMessages) {
+					Iterator<Message> messages = getUnreadMessages(user);
+					_logger.trace("As we have filtered out a message, am now logging the bodies of offline messages");
+					while (messages.hasNext()) {
+						Message m = messages.next();
+						_logger.trace("    "+m.toXML());
+						
+					}
+				}*/
+			} catch (Exception e) {
+				_logger.error("Error retrieving unread messages for "+user.getUsername());
+				resetConnection(user);
+				throw new XMPPExecutionException("Error retrieving unread message headers for "+user.getUsername(), e);
 			}
-			/*
-			 * For investigation only - do not leave in production code, even on TRACE, as it crashes the server a lot
-			 */
 			
-			/* if (_logger.isTraceEnabled() && traceAllMessages) {
-				Iterator<Message> messages = getUnreadMessages(user);
-				_logger.trace("As we have filtered out a message, am now logging the bodies of offline messages");
-				while (messages.hasNext()) {
-					Message m = messages.next();
-					_logger.trace("    "+m.toXML());
-					
-				}
-			}*/
-		} catch (Exception e) {
-			_logger.error("Error retrieving unread messages for "+user.getUsername());
-			resetConnection(user);
-			throw new XMPPExecutionException("Error retrieving unread message headers for "+user.getUsername(), e);
+			if (filteredHeaders.size()>0) {
+				resetConnection(user);
+			}		
+			return filteredHeaders.iterator();
 		}
-		
-		if (filteredHeaders.size()>0) {
-			resetConnection(user);
-		}		
-		return filteredHeaders.iterator();
 
 	}
 
@@ -148,27 +153,27 @@ public class XMPPUnreadMessageServiceImpl extends XMPPService implements XMPPUnr
 		validateUser(user);
 		
 		Connection connection = getConnection(user);
-		
-		OfflineMessageManager offlineMessages = getOfflineMessageManager(connection);
-		
-		if (_logger.isInfoEnabled()) {
-			_logger.info("Retrieving unread messages for "+user.getUsername());
-		}
-		
-		Iterator<Message> messages = null;
-		try {
-			messages = offlineMessages.getMessages();
-			if (offlineMessages.getMessageCount()>0) {
-				resetConnection(user);
+		synchronized(connection) {
+			OfflineMessageManager offlineMessages = getOfflineMessageManager(connection);
+			
+			if (_logger.isInfoEnabled()) {
+				_logger.info("Retrieving unread messages for "+user.getUsername());
 			}
-		} catch (XMPPException e) {
-			_logger.error("Error retrieving unread messages for "+user.getUsername());
-			resetConnection(user);
-			throw new XMPPExecutionException("Error retrieving unread messages for "+user.getUsername(), e);
+			
+			Iterator<Message> messages = null;
+			try {
+				messages = offlineMessages.getMessages();
+				if (offlineMessages.getMessageCount()>0) {
+					resetConnection(user);
+				}
+			} catch (XMPPException e) {
+				_logger.error("Error retrieving unread messages for "+user.getUsername());
+				resetConnection(user);
+				throw new XMPPExecutionException("Error retrieving unread messages for "+user.getUsername(), e);
+			}
+			
+			return messages;
 		}
-		
-		
-		return messages;
 		
 	}
 
