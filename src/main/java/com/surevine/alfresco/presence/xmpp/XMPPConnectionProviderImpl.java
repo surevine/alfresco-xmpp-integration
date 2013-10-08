@@ -118,14 +118,14 @@ public class XMPPConnectionProviderImpl implements XMPPConnectionProvider {
 		if (_logger.isTraceEnabled()) {
 			_logger.trace("Closing the connection for "+user.getUsername());
 		}
-		Connection connection = connections.get(user);
+		Connection connection = connections.remove(user);
 		if (connection==null) {
 			if (_logger.isDebugEnabled()) {
 				_logger.debug("Attempted to close a connection for "+user+" but no connection was found");
 			}
 			return;
 		}
-		connections.remove(user);
+
 		try {
 			if (p!=null) {
 				connection.disconnect(p);
