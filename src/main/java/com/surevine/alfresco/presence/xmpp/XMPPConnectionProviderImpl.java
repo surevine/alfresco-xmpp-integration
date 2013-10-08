@@ -125,6 +125,7 @@ public class XMPPConnectionProviderImpl implements XMPPConnectionProvider {
 			}
 			return;
 		}
+		connections.remove(user);
 		try {
 			if (p!=null) {
 				connection.disconnect(p);
@@ -138,7 +139,6 @@ public class XMPPConnectionProviderImpl implements XMPPConnectionProvider {
 				_logger.debug("Attempted to disconnect from a connection for "+user+" but failed.  This is probably not an issue of operational concern, and should be treated as normal behaviour", e);
 			}
 		}
-		connections.remove(user);
 	}
 	
 	@Override
