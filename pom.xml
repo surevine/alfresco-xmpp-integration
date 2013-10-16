@@ -23,7 +23,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.surevine.alfresco</groupId>
 	<artifactId>alfresco_presence</artifactId>
-	<version>1.1.7</version>
+	<version>1.1.7-SNAPSHOT</version>
 	<description>Provides various presence services to be used in Alfresco.</description>
 	<organization>
 		<name>Surevine</name>
@@ -57,7 +57,7 @@
 
 	<!-- Required by the release plugin -->
 	<scm>
-		<developerConnection>scm:svn:https://svn.surevine.net/integration/alfresco_presence/trunk</developerConnection>
+		<developerConnection>scm:git:git@github.com:surevine/alfresco-xmpp-integration.git</developerConnection>
 	</scm>
 
 	<dependencyManagement>
@@ -207,9 +207,6 @@
 				<plugin>
 					<artifactId>maven-release-plugin</artifactId>
 					<version>2.1</version>
-					<configuration>
-						<tagBase>https://svn.surevine.net/integration/alfresco_presence/tags</tagBase>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
