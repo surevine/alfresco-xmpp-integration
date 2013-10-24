@@ -125,6 +125,7 @@ public class XMPPConnectionProviderImpl implements XMPPConnectionProvider {
 			}
 			return;
 		}
+		connectionActivity.remove(user);
 
 		try {
 			if (p!=null) {
