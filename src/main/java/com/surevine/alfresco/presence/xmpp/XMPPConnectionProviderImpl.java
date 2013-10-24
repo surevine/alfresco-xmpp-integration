@@ -166,10 +166,6 @@ public class XMPPConnectionProviderImpl implements XMPPConnectionProvider {
 		}
 		
 		if (connection==null) {
-			if (_logger.isTraceEnabled()) {
-				_logger.trace("Creating a connection for "+user.getUsername());
-			}
-			
 			if (_logger.isInfoEnabled()) {
 				_logger.info("No connection available for "+user.getUsername()+" so getting a new one");
 			}
@@ -179,38 +175,43 @@ public class XMPPConnectionProviderImpl implements XMPPConnectionProvider {
 			cConfig.setRosterLoadedAtLogin(true);
 			cConfig.setSendPresence(false); //Log in silently
 			connection = new XMPPConnection(cConfig);
+			
+			connections.put(user, connection);
 		
-			try {
-				connection.connect();
-			} catch (XMPPException e) {
-				_logger.error("Could not make a connection as "+user.getUsername()+" with "+config, e);
-				throw new XMPPConfigurationException("Could not connect with "+config, e);
-			}
-			
-			try {
-				if (_logger.isTraceEnabled()) {
-					_logger.trace("Packet reply timeout:" +SmackConfiguration.getPacketReplyTimeout());
-					_logger.trace("Logging in as "+user.getUsername());
+			synchronized(connection) {
+				try {
+					connection.connect();
+				} catch (XMPPException e) {
+					closeConnection(config, user);
+					_logger.error("Could not make a connection as "+user.getUsername()+" with "+config, e);
+					throw new XMPPConfigurationException("Could not connect with "+config, e);
 				}
-				connection.login(user.getUsername(), user.getPassword(), resource);
-			} catch (XMPPException e) {
-				_logger.error("Could not login as "+user.getUsername(), e);
-				throw new XMPPExecutionException("Could not login as "+user, e);
-			}
-			
-			try {
-				Presence presence = _defaultPresenceProvider.getDefaultPresence(user);
-				connection.sendPacket(presence);
-			} catch (Exception e) {
-				_logger.error("Could not set default presence for "+user.getUsername(), e);
-				throw new XMPPExecutionException("Could not set default presence for "+user, e);
+				
+				try {
+					if (_logger.isTraceEnabled()) {
+						_logger.trace("Packet reply timeout:" +SmackConfiguration.getPacketReplyTimeout());
+						_logger.trace("Logging in as "+user.getUsername());
+					}
+					connection.login(user.getUsername(), user.getPassword(), resource);
+				} catch (XMPPException e) {
+					closeConnection(config, user);
+					_logger.error("Could not login as "+user.getUsername(), e);
+					throw new XMPPExecutionException("Could not login as "+user, e);
+				}
+				
+				try {
+					Presence presence = _defaultPresenceProvider.getDefaultPresence(user);
+					connection.sendPacket(presence);
+				} catch (Exception e) {
+					closeConnection(config, user);
+					_logger.error("Could not set default presence for "+user.getUsername(), e);
+					throw new XMPPExecutionException("Could not set default presence for "+user, e);
+				}
 			}
 			
 			if (_logger.isDebugEnabled()) {
 				_logger.debug("Connection for "+user.getUsername()+" created");
 			}
-			
-			connections.put(user, connection);
 		}
 		
 		

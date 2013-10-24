@@ -85,7 +85,11 @@ public class XMPPUnreadMessageServiceImpl extends XMPPService implements XMPPUnr
 		validateUser(user);
 		
 		Connection connection = getConnection(user);
+		
 		synchronized (connection) {
+			if (connection == null || !connection.isConnected() || !connection.isAuthenticated()) {
+				_logger.error("About to attempt retrieval of unread messages with a dead connection.");
+			}
 			
 			OfflineMessageManager offlineMessages = getOfflineMessageManager(connection);
 			
@@ -93,18 +97,17 @@ public class XMPPUnreadMessageServiceImpl extends XMPPService implements XMPPUnr
 				_logger.info("Retrieving unread message headers for "+user.getUsername());
 			}
 			
-			Iterator<OfflineMessageHeader> headers = null; 
+			Iterator<OfflineMessageHeader> headers; 
 			Collection<OfflineMessageHeader> filteredHeaders = new ArrayList<OfflineMessageHeader>();
 			try {
 				headers = offlineMessages.getHeaders();
 				if (_logger.isDebugEnabled()) {
 					_logger.debug("Found the following message headers:");
 				}
-				Iterator<OfflineMessageHeader> dbHeaders = offlineMessages.getHeaders();
 				//boolean traceAllMessages=false; //See below block
 				
-				while (dbHeaders.hasNext()) {
-					OfflineMessageHeader header = dbHeaders.next();
+				while (headers.hasNext()) {
+					OfflineMessageHeader header = headers.next();
 					if (_logger.isDebugEnabled()) {
 						_logger.debug("    "+header.getJid()+"|"+header.getStamp()+"|"+header.getUser());
 					}
