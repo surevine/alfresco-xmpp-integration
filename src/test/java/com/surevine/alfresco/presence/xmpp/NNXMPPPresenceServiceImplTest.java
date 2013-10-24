@@ -108,12 +108,16 @@ public class NNXMPPPresenceServiceImplTest {
 		XMPPConnectionProvider connectionProvider = new MockXMPPConnectionProvider(user);
 		fixture.setXMPPConnectionProvider(connectionProvider);
 		
+		runSetPresence(connectionProvider, user, availability, superUserName, superUserPassword);	
+	}
+
+	protected void runSetPresence(XMPPConnectionProvider connectionProvider, XMPPUser user, SimplePresence.Availability availability, String superUserName, String superUserPassword) {
 		SimplePresence sp = new SimplePresence(availability, user, "space", "message");
 
 		// Manually put presence into the collection, simulating the openfire presence events being captured
 		Map<String, PresenceEntry> resourceMap = new HashMap<String, PresenceEntry>();
-		resourceMap.put(userName+"@10.66.2.95/testresource1", fixture.new PresenceEntry(new Presence(Type.available, "", 1, sp.convertToXMPPPresence().getMode())));
-		fixture.presences.put(userName+"@10.66.2.95", resourceMap);
+		resourceMap.put(user.getUsername()+"@10.66.2.95/testresource1", fixture.new PresenceEntry(new Presence(Type.available, "", 1, sp.convertToXMPPPresence().getMode())));
+		fixture.presences.put(user.getUsername()+"@10.66.2.95", resourceMap);
 				
 		fixture.setPresence(sp);
 		
@@ -130,8 +134,12 @@ public class NNXMPPPresenceServiceImplTest {
 	
 	@Test
 	public void testSetPresenceOnlineBusy() {
-		runSetPresence("user0001-org01", "T3G0gD1dJxp1sfko", Availability.AVAILABLE, "user0002-org01", "T3G0gD1dJxp1sfko");
-		runSetPresence("user0001-org01", "T3G0gD1dJxp1sfko", Availability.BUSY, "user0002-org01", "T3G0gD1dJxp1sfko");
+		XMPPUser user = new XMPPUser("user0001-org01", "T3G0gD1dJxp1sfko");
+		XMPPConnectionProvider connectionProvider = new MockXMPPConnectionProvider(user);
+		fixture.setXMPPConnectionProvider(connectionProvider);
+	
+		runSetPresence(connectionProvider, user, Availability.AVAILABLE, "user0002-org01", "T3G0gD1dJxp1sfko");
+		runSetPresence(connectionProvider, user, Availability.BUSY, "user0002-org01", "T3G0gD1dJxp1sfko");
 	}
 	
 	@Test(expected=XMPPExecutionException.class)
