@@ -53,7 +53,9 @@ public class DefaultPresenceService implements PresenceService {
 			
 			return getPresenceFromSimplePresence(simplePresence, userName);
 		} catch (final Exception e) {
-			LOG.warn("Error finding presence information for user " +userName, e);
+			LOG.warn("Error finding presence information for user " +userName);
+			LOG.debug("Error finding presence information for user " +userName, e);
+			
 			return new Presence(com.surevine.alfresco.presence.Availability.UNKNOWN,
 					"", userName, host, remoteServiceEnabled);
 		}
