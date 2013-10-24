@@ -139,6 +139,11 @@ public class NNXMPPPresenceServiceImplTest {
 		fixture.setXMPPConnectionProvider(connectionProvider);
 	
 		runSetPresence(connectionProvider, user, Availability.AVAILABLE, "user0002-org01", "T3G0gD1dJxp1sfko");
+		try {
+			Thread.sleep(250);
+		} catch (InterruptedException e) {
+			// We're just attempting to ensure the previous message is set before the busy is checked.
+		}
 		runSetPresence(connectionProvider, user, Availability.BUSY, "user0002-org01", "T3G0gD1dJxp1sfko");
 	}
 	
