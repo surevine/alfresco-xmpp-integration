@@ -21,8 +21,6 @@
 */
 package com.surevine.alfresco.presence.xmpp;
 
-import org.jivesoftware.smack.packet.Presence;
-
 /**
  * Service to interact with an XMPP server to get/set presence information for a user.
  * 
