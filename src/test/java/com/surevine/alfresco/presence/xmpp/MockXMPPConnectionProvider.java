@@ -41,12 +41,6 @@ import org.jivesoftware.smack.packet.Presence;
  *
  */
 public class MockXMPPConnectionProvider implements XMPPConnectionProvider {
-
-	private XMPPUser user;		
-
-	public MockXMPPConnectionProvider(XMPPUser user) {
-		this.user=user;
-	}
 	
 	@Override
 	public Connection getConnection(XMPPConfiguration config, XMPPUser user) {
