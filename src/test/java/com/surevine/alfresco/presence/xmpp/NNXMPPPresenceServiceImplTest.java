@@ -105,7 +105,7 @@ public class NNXMPPPresenceServiceImplTest {
 
 	protected void runSetPresence(String userName, String password, SimplePresence.Availability availability, String superUserName, String superUserPassword) {
 		XMPPUser user = new XMPPUser(userName, password);
-		XMPPConnectionProvider connectionProvider = new MockXMPPConnectionProvider(user);
+		XMPPConnectionProvider connectionProvider = new MockXMPPConnectionProvider();
 		fixture.setXMPPConnectionProvider(connectionProvider);
 		
 		SimplePresence sp = new SimplePresence(availability, user, "space", "message");
