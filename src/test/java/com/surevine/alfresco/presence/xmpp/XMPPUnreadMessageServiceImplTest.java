@@ -53,7 +53,7 @@ public class XMPPUnreadMessageServiceImplTest {
 	
 	protected XMPPPresenceServiceImpl presenceService = new XMPPPresenceServiceImpl() {
 		protected void setUpRoster() {
-			setXMPPConnectionProvider(new MockXMPPConnectionProvider(new XMPPUser("user0002-org1", "validPassword")));
+			setXMPPConnectionProvider(new MockXMPPConnectionProvider());
 			super.setUpRoster();
 		};
 		protected UserSearchManager getUserSearchManager(Connection c) {
@@ -81,7 +81,7 @@ public class XMPPUnreadMessageServiceImplTest {
 	
 	@Before
 	public void setMockConnectionProvider() {
-		fixture.setXMPPConnectionProvider(new MockXMPPConnectionProvider(new XMPPUser("user0001-org1", "validPassword")));
+		fixture.setXMPPConnectionProvider(new MockXMPPConnectionProvider());
 	}
 	
 	@Test
