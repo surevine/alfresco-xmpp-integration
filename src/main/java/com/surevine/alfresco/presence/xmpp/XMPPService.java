@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.ReportedData;
 import org.jivesoftware.smackx.ReportedData.Row;
@@ -63,7 +64,24 @@ public abstract class XMPPService {
 		_retryWaitMillis=retryWait;
 	}
 	
-	protected abstract void resetConnection(XMPPUser user);
+	protected void resetConnection(XMPPUser user) {
+		if (_logger.isDebugEnabled()) {
+			_logger.debug("Resetting connection for "+user.getUsername());
+		}
+		
+		try {
+			getConnectionProvider().closeConnection(XMPPConfiguration.getConfiguration(), user);
+		}
+		catch (Exception e) {
+			_logger.warn("Could not close the connection for "+user.getUsername()+" in order to reset it.  Will establish a new connection instead", e);
+		}
+		
+		//Next, establish a new connection as that user
+		getConnection(user);
+		if (_logger.isTraceEnabled()) {
+			_logger.trace("Connection reset for "+user.getUsername());
+		}
+	}
 
 	
 	/**
