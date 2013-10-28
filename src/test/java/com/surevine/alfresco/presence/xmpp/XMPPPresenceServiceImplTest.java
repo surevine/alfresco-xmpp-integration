@@ -43,7 +43,7 @@ public class XMPPPresenceServiceImplTest {
 	
 	protected XMPPPresenceServiceImpl fixture = new XMPPPresenceServiceImpl() {
 		protected void setUpRoster() {
-			setXMPPConnectionProvider(new MockXMPPConnectionProvider(new XMPPUser("user0002-org1", "validPassword")));
+			setXMPPConnectionProvider(new MockXMPPConnectionProvider());
 			super.setUpRoster();
 		};
 		protected UserSearchManager getUserSearchManager(Connection c) {
@@ -105,7 +105,7 @@ public class XMPPPresenceServiceImplTest {
 
 	protected void runSetPresence(String userName, String password, SimplePresence.Availability availability, String superUserName, String superUserPassword) {
 		XMPPUser user = new XMPPUser(userName, password);
-		XMPPConnectionProvider connectionProvider = new MockXMPPConnectionProvider(user);
+		XMPPConnectionProvider connectionProvider = new MockXMPPConnectionProvider();
 		fixture.setXMPPConnectionProvider(connectionProvider);
 		
 		SimplePresence sp = new SimplePresence(availability, user, "space", "message");
