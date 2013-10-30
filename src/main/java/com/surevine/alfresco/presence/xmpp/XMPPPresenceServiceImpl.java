@@ -71,7 +71,7 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 		}
 		
 		public String toString() {
-			return "PresenceEntry [Pri="+_presence.getPriority()+" Status="+_presence.getStatus()+" lastChecked="+_lastChecked+"]";
+			return "PresenceEntry [Pri="+_presence.getPriority()+" Status="+_presence.getMode()+"|"+_presence.getStatus()+" lastChecked="+_lastChecked+"]";
 		}
 		
 		
@@ -233,7 +233,7 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 						if (_logger.isTraceEnabled()) {
 							_logger.trace("Using bare username: "+bareUserName);
 						}
-						if (_ignoreDisconnects.get(shortJid)!=null) {
+						if (_ignoreDisconnects.get(bareUserName)!=null) {
 							int numberOfDisconnectsToIgnore = _ignoreDisconnects.get(bareUserName);
 							if (numberOfDisconnectsToIgnore>0) {
 								_ignoreDisconnects.put(bareUserName, numberOfDisconnectsToIgnore--);
