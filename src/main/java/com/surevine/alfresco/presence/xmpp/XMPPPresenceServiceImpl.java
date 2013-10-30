@@ -230,12 +230,17 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 						//Decide whether or not to ignore the disconnection presence
 						boolean ignoreDisconnect=false;
 						String bareUserName=shortJid.substring(0, shortJid.indexOf('@'));
+						if (_logger.isTraceEnabled()) {
+							_logger.trace("Using bare username: "+bareUserName);
+						}
 						if (_ignoreDisconnects.get(shortJid)!=null) {
 							int numberOfDisconnectsToIgnore = _ignoreDisconnects.get(bareUserName);
 							if (numberOfDisconnectsToIgnore>0) {
 								_ignoreDisconnects.put(bareUserName, numberOfDisconnectsToIgnore--);
 								ignoreDisconnect=true;
-								_logger.trace("Ignoring disconnection presence for "+shortJid+" "+(numberOfDisconnectsToIgnore-1)+" further disconnects will be ignored for this user");
+								if (_logger.isTraceEnabled()) {
+									_logger.trace("Ignoring disconnection presence for "+shortJid+" "+(numberOfDisconnectsToIgnore-1)+" further disconnects will be ignored for this user");
+								}
 							}
 						}
 						
@@ -243,7 +248,6 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 							if (_logger.isTraceEnabled()) {
 								_logger.trace(String.format("Removing entry for %s with jid %s.", shortJid, newPresence.getFrom()));
 							}
-						
 							entries.remove(newPresence.getFrom());
 						}
 					}
