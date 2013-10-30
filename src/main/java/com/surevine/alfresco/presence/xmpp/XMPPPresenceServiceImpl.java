@@ -47,7 +47,7 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 
 	private static final Log _logger = LogFactory.getLog(XMPPPresenceServiceImpl.class);
 	
-	private Map<String, Integer> _ignoreDisconnects = new HashMap<String, Integer>();
+	private volatile Map<String, Integer> _ignoreDisconnects = new HashMap<String, Integer>();
 	
 	/**
 	 * Map containing the services view of each users' presence
@@ -236,7 +236,7 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 						if (_ignoreDisconnects.get(bareUserName)!=null) {
 							int numberOfDisconnectsToIgnore = _ignoreDisconnects.get(bareUserName);
 							if (numberOfDisconnectsToIgnore>0) {
-								_ignoreDisconnects.put(bareUserName, numberOfDisconnectsToIgnore--);
+								_ignoreDisconnects.put(bareUserName, numberOfDisconnectsToIgnore-1);
 								ignoreDisconnect=true;
 								if (_logger.isTraceEnabled()) {
 									_logger.trace("Ignoring disconnection presence for "+shortJid+" "+(numberOfDisconnectsToIgnore-1)+" further disconnects will be ignored for this user");
