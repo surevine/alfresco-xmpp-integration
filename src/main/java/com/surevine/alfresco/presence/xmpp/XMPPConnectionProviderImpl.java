@@ -201,6 +201,7 @@ public class XMPPConnectionProviderImpl implements XMPPConnectionProvider {
 				}
 				
 				try {
+					_logger.trace("Sending default presence packet for "+user.getUsername());
 					Presence presence = _defaultPresenceProvider.getDefaultPresence(user);
 					connection.sendPacket(presence);
 				} catch (Exception e) {

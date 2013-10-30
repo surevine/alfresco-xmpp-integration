@@ -135,7 +135,7 @@ public class NNXMPPPresenceServiceImplTest {
 	@Test
 	public void testSetPresenceOnlineBusy() {
 		XMPPUser user = new XMPPUser("user0001-org01", "T3G0gD1dJxp1sfko");
-		XMPPConnectionProvider connectionProvider = new MockXMPPConnectionProvider(user);
+		XMPPConnectionProvider connectionProvider = new MockXMPPConnectionProvider();
 		fixture.setXMPPConnectionProvider(connectionProvider);
 	
 		runSetPresence(connectionProvider, user, Availability.AVAILABLE, "user0002-org01", "T3G0gD1dJxp1sfko");

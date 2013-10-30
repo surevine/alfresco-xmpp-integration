@@ -47,6 +47,8 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 
 	private static final Log _logger = LogFactory.getLog(XMPPPresenceServiceImpl.class);
 	
+	private Map<String, Integer> _ignoreDisconnects = new HashMap<String, Integer>();
+	
 	/**
 	 * Map containing the services view of each users' presence
 	 */
@@ -126,6 +128,17 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 	private String testUserName="admin";
 	public void setTestUserName(String userName) {
 		testUserName=userName;
+	}
+	
+	public synchronized void ignoreNextDisconnectFor(XMPPUser user) {
+		
+		Integer currentValue = _ignoreDisconnects.get(user.getUsername());
+		if (currentValue==null) {
+			_ignoreDisconnects.put(user.getUsername(), 1);
+		}
+		else {
+			_ignoreDisconnects.put(user.getUsername(), currentValue+1);
+		}
 	}
 	
 	private Date nextRosterTestDate = new Date(0l);
@@ -210,11 +223,25 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 				// Check whether received packet indicates user has gone offline
 				if (newPresence.getType().equals(Presence.Type.unavailable)) {
 					if (entries.keySet().contains(newPresence.getFrom())) {
-						if (_logger.isTraceEnabled()) {
-							_logger.trace(String.format("Removing entry for %s with jid %s.", shortJid, newPresence.getFrom()));
+
+						//Decide whether or not to ignore the disconnection presence
+						boolean ignoreDisconnect=false;
+						if (_ignoreDisconnects.get(shortJid)!=null) {
+							int numberOfDisconnectsToIgnore = _ignoreDisconnects.get(shortJid);
+							if (numberOfDisconnectsToIgnore>0) {
+								_ignoreDisconnects.put(shortJid, numberOfDisconnectsToIgnore--);
+								ignoreDisconnect=true;
+								_logger.trace("Ignoring disconnection presence for "+shortJid+" "+(numberOfDisconnectsToIgnore-1)+" further disconnects will be ignored for this user");
+							}
 						}
 						
-						entries.remove(newPresence.getFrom());
+						if (!ignoreDisconnect) {
+							if (_logger.isTraceEnabled()) {
+								_logger.trace(String.format("Removing entry for %s with jid %s.", shortJid, newPresence.getFrom()));
+							}
+						
+							entries.remove(newPresence.getFrom());
+						}
 					}
 				} else {
 					if (_logger.isTraceEnabled()) {

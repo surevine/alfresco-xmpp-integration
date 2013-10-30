@@ -49,4 +49,6 @@ public interface XMPPPresenceService {
 	
 	public void forgetSuperUserRoster();
 	
+	public void ignoreNextDisconnectFor(XMPPUser user);
+	
 }

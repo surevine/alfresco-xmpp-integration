@@ -220,6 +220,7 @@ public class XMPPUnreadMessageServiceImpl extends XMPPService implements XMPPUnr
 				}
 				else { //We have a presence service, no super-user so close connection and send presence
 					Presence toSend = _presenceService.getPresence(user.getUsername()).convertToXMPPPresence();
+					_presenceService.ignoreNextDisconnectFor(user);
 					getConnectionProvider().closeConnection(XMPPConfiguration.getConfiguration(), user, toSend);
 				}
 			}
