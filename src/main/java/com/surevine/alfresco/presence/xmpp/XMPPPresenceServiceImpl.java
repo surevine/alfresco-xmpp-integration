@@ -132,6 +132,9 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 	
 	public synchronized void ignoreNextDisconnectFor(XMPPUser user) {
 		
+		if (_logger.isTraceEnabled()) {
+			_logger.trace("Ignoring next disconnection for "+user.getUsername());
+		}
 		Integer currentValue = _ignoreDisconnects.get(user.getUsername());
 		if (currentValue==null) {
 			_ignoreDisconnects.put(user.getUsername(), 1);
@@ -226,10 +229,11 @@ public class XMPPPresenceServiceImpl extends XMPPService implements XMPPPresence
 
 						//Decide whether or not to ignore the disconnection presence
 						boolean ignoreDisconnect=false;
+						String bareUserName=shortJid.substring(0, shortJid.indexOf('@'));
 						if (_ignoreDisconnects.get(shortJid)!=null) {
-							int numberOfDisconnectsToIgnore = _ignoreDisconnects.get(shortJid);
+							int numberOfDisconnectsToIgnore = _ignoreDisconnects.get(bareUserName);
 							if (numberOfDisconnectsToIgnore>0) {
-								_ignoreDisconnects.put(shortJid, numberOfDisconnectsToIgnore--);
+								_ignoreDisconnects.put(bareUserName, numberOfDisconnectsToIgnore--);
 								ignoreDisconnect=true;
 								_logger.trace("Ignoring disconnection presence for "+shortJid+" "+(numberOfDisconnectsToIgnore-1)+" further disconnects will be ignored for this user");
 							}
