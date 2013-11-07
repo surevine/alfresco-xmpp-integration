@@ -193,7 +193,6 @@ public class XMPPConnectionProviderImpl implements XMPPConnectionProvider {
 						_logger.trace("Logging in as "+user.getUsername());
 					}
 					connection.login(user.getUsername(), user.getPassword(), resource);
-					System.out.println("PASSWORD:"+user.getPassword());
 				} catch (XMPPException e) {
 					closeConnection(config, user);
 					_logger.error("Could not login as "+user.getUsername(), e);
