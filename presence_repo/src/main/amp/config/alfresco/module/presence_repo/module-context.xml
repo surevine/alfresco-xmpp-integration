@@ -18,12 +18,53 @@
 <!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
 
 <beans>
-    <bean id="presenceScript" parent="baseJavaScriptExtension" class="org.alfresco.repo.jscript.Presence">
+    
+        <!--  XMPP Facilities exposed to Javascript API -->
+    <bean id="xmppScript" parent="baseJavaScriptExtension" class="com.surevine.alfresco.presence.XMPPScriptService">
         <property name="extensionName">
-            <value>presence</value>
-        </property>        
-        <property name="serviceRegistry">
-            <ref bean="ServiceRegistry"/>
+            <value>xmpp</value>
+        </property>
+        <property name="superuserCredentials">
+            <value>T3G0gD1dJxp1sfko</value>
+        </property>
+        <property name="XMPPPresenceService">
+            <ref bean="com.surevine.alfresco.presence.xmpp.XMPPPresenceService"/>
+        </property>
+        <property name="XMPPUnreadMessageService">
+            <ref bean="com.surevine.alfresco.presence.xmpp.XMPPUnreadMessageService"/>
         </property>
     </bean>    
+    
+     <bean id="com.surevine.alfresco.presence.xmpp.XMPPConfiguration" class="com.surevine.alfresco.presence.xmpp.XMPPConfiguration">
+       <property name="host">
+           <value>10.66.2.228</value>
+       </property>
+        <property name="superUserPassword">
+            <value>T3G0gD1dJxp1sfko</value>
+        </property>
+    </bean>
+    
+    <bean id="com.surevine.alfresco.presence.xmpp.XMPPConnectionProvider" class="com.surevine.alfresco.presence.xmpp.XMPPConnectionProviderImpl" depends-on="com.surevine.alfresco.presence.xmpp.XMPPConfiguration">
+    	<property name="resource"><value>Smack-Space</value></property>
+    </bean>
+
+	<bean id="com.surevine.alfresco.presence.xmpp.XMPPPresenceService"
+		class="com.surevine.alfresco.presence.xmpp.XMPPPresenceServiceImpl">
+		<property name="XMPPServer">
+			<value>10.66.2.228</value>
+		</property>
+		<property name="XMPPConnectionProvider">
+		  <ref bean="com.surevine.alfresco.presence.xmpp.XMPPConnectionProvider"/>
+		</property>
+	</bean>
+
+	<bean id="com.surevine.alfresco.presence.xmpp.XMPPUnreadMessageService"
+		class="com.surevine.alfresco.presence.xmpp.XMPPUnreadMessageServiceImpl">
+		<property name="XMPPConnectionProvider">
+          <ref bean="com.surevine.alfresco.presence.xmpp.XMPPConnectionProvider"/>
+        </property>
+        <property name="XMPPPresenceService">
+          <ref bean="com.surevine.alfresco.presence.xmpp.XMPPPresenceService"/>
+        </property>
+	</bean>
 </beans>
